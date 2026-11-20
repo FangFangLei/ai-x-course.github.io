@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI+X 互动课堂 · 石油化工安全帽智能检测</title>
+<style>
+  :root{
+    --bg:#f4f6fa; --card:#ffffff; --ink:#1e293b; --muted:#64748b;
+    --accent:#0e7490; --accent-soft:#cffafe; --red:#dc2626; --green:#16a34a;
+    --orange:#ea580c; --border:#e2e8f0; --code-bg:#f1f5f9;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"PingFang SC","Microsoft YaHei","Segoe UI",sans-serif;line-height:1.75;}
+  header{background:linear-gradient(135deg,#134e4a,#0e7490 55%,#0891b2);color:#fff;
+    padding:44px 20px 36px;text-align:center;}
+  header h1{margin:0 0 8px;font-size:29px;letter-spacing:1px;}
+  header p{margin:4px 0;opacity:.92;font-size:15px;}
+  .wrap{max-width:1000px;margin:0 auto;padding:24px 16px 80px;}
+  .toolbar{display:flex;gap:10px;justify-content:flex-end;margin:14px 0 6px;flex-wrap:wrap;}
+  details.section{background:var(--card);border:1px solid var(--border);border-radius:14px;
+    margin:16px 0;box-shadow:0 1px 3px rgba(15,23,42,.06);overflow:hidden;}
+  details.section summary{cursor:pointer;list-style:none;padding:16px 20px;font-size:19px;
+    font-weight:700;display:flex;align-items:center;gap:10px;user-select:none;}
+  details.section summary::-webkit-details-marker{display:none;}
+  details.section summary .num{background:var(--accent);color:#fff;border-radius:8px;
+    width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;
+    font-size:16px;flex:none;}
+  details.section summary .arrow{margin-left:auto;color:var(--muted);font-size:14px;transition:transform .2s;}
+  details.section[open] summary .arrow{transform:rotate(180deg);}
+  .body{padding:4px 22px 26px;border-top:1px solid var(--border);}
+  h3{margin:26px 0 8px;font-size:17px;color:#0f172a;border-left:4px solid var(--accent);padding-left:10px;}
+  p{margin:8px 0;}
+  .tip{background:var(--accent-soft);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;
+    padding:10px 14px;margin:12px 0;font-size:14.5px;}
+  .warn{background:#fef3c7;border-left:4px solid #d97706;border-radius:0 8px 8px 0;
+    padding:10px 14px;margin:12px 0;font-size:14.5px;}
+  .danger{background:#fee2e2;border-left:4px solid var(--red);border-radius:0 8px 8px 0;
+    padding:10px 14px;margin:12px 0;font-size:14.5px;}
+  .formula{background:var(--code-bg);border:1px dashed #cbd5e1;border-radius:8px;
+    padding:10px 14px;margin:10px 0;font-family:"Cambria Math",Georgia,serif;font-size:16px;text-align:center;}
+  code.inline{background:var(--code-bg);padding:1px 6px;border-radius:5px;font-size:14px;}
+  pre.code{background:#0f172a;color:#e2e8f0;border-radius:10px;padding:14px 16px;
+    font-family:Consolas,monospace;font-size:13px;overflow-x:auto;line-height:1.6;}
+  pre.code .cm{color:#64748b;}pre.code .kw{color:#38bdf8;}pre.code .fn{color:#facc15;}
+  table{border-collapse:collapse;width:100%;margin:12px 0;font-size:14px;}
+  th,td{border:1px solid var(--border);padding:7px 10px;text-align:left;}
+  th{background:var(--code-bg);}
+  .demo{background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:16px;margin:14px 0;}
+  .demo-title{font-weight:700;font-size:14.5px;color:var(--accent);margin-bottom:8px;}
+  .ctrl{display:flex;align-items:center;gap:10px;margin:8px 0;flex-wrap:wrap;font-size:14px;}
+  .ctrl label{min-width:130px;}
+  input[type=range]{flex:1;min-width:150px;accent-color:var(--accent);}
+  .val{font-family:Consolas,monospace;background:var(--code-bg);padding:1px 8px;border-radius:5px;
+    min-width:56px;text-align:center;font-size:13px;}
+  button{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:7px 16px;
+    font-size:14px;cursor:pointer;font-family:inherit;transition:opacity .15s;}
+  button:hover{opacity:.85;}
+  button.ghost{background:#fff;color:var(--accent);border:1px solid var(--accent);}
+  button.step{background:#fff;color:#0f172a;border:1px solid var(--border);}
+  button.step.on{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .canvases{display:flex;gap:16px;flex-wrap:wrap;margin:10px 0;align-items:flex-start;}
+  .cv-box{text-align:center;}
+  .cv-box canvas{border:1px solid var(--border);border-radius:8px;background:#fff;}
+  .cv-box .cap{font-size:13px;color:var(--muted);margin-top:4px;}
+  .stat{font-family:Consolas,monospace;font-size:14px;background:var(--code-bg);
+    display:inline-block;padding:4px 12px;border-radius:6px;margin:4px 2px;}
+  .stat b{color:var(--accent);}
+  .quiz-q{border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin:12px 0;}
+  .quiz-q .opts label{display:block;margin:5px 0;cursor:pointer;font-size:14.5px;}
+  .quiz-q.correct{border-color:var(--green);background:#f0fdf4;}
+  .quiz-q.wrong{border-color:var(--red);background:#fef2f2;}
+  .expl{display:none;font-size:13.5px;color:#475569;background:var(--code-bg);
+    border-radius:8px;padding:8px 12px;margin-top:8px;}
+  .done .expl{display:block;}
+  footer{text-align:center;color:var(--muted);font-size:13px;padding:20px;}
+  .timeline{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;}
+  .tl-item{flex:1;min-width:110px;background:var(--code-bg);border-radius:8px;padding:8px 10px;
+    text-align:center;cursor:pointer;font-size:12.5px;border:1px solid transparent;}
+  .tl-item:hover{border-color:var(--accent);}
+  .tl-item b{display:block;font-size:13px;color:var(--accent);}
+  .tl-detail{background:var(--accent-soft);border-radius:8px;padding:10px 14px;font-size:14px;min-height:44px;}
+  .badge{display:inline-block;padding:1px 10px;border-radius:999px;font-size:12.5px;color:#fff;}
+  .pipe-flow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:12px 0;justify-content:center;}
+  .pipe-flow .kcard{min-width:120px;}
+  .kcard{border:1px solid var(--border);border-radius:10px;padding:8px 10px;text-align:center;
+    font-size:13px;background:#fff;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⛑️ AI+X 互动课堂 · 石油化工安全帽智能检测</h1>
+  <p>当 AI 遇上石化安全：从 YOLO 目标检测到现场违章自动识别</p>
+  <p style="font-size:13px;">基于开源项目 hard-hat-detection（YOLOv8 / YOLO11）设计 · 全部演示浏览器本地运行 · 无需外部资源</p>
+</header>
+
+<div class="wrap">
+  <div class="toolbar">
+    <button class="ghost" onclick="document.querySelectorAll('details.section').forEach(d=>d.open=true)">全部展开</button>
+    <button class="ghost" onclick="document.querySelectorAll('details.section').forEach(d=>d.open=false)">全部收起</button>
+  </div>
+
+  <!-- ================= 1. 概览 ================= -->
+  <details class="section" open>
+    <summary><span class="num">1</span>概览：当 AI 遇上石油化工安全<span class="arrow">▼</span></summary>
+    <div class="body">
+      <p><b>为什么石化现场需要 AI？</b>炼化装置区存在动火作业、高处作业、受限空间作业等高风险场景，
+      《中国石化安全生产行为规范》要求进入生产区必须正确佩戴安全帽等个人防护装备（PPE）。
+      但装置区大、人员多，纯靠安全员巡检"看不过来、盯不住"。
+      <b>AI+X 的思路</b>：用摄像头 + 目标检测模型 7×24 小时自动识别"谁没戴安全帽"，发现违章立即告警。</p>
+
+      <h3>1.1 参考项目：hard-hat-detection 是怎么做的</h3>
+      <div class="pipe-flow">
+        <div class="kcard">📹 现场图像 / 视频</div><span>→</span>
+        <div class="kcard">🔍 YOLO 检测<b>人员</b><br><span style="color:var(--muted);font-size:12px;">PersonTracker</span></div><span>→</span>
+        <div class="kcard">⛑️ YOLO 检测<b>安全帽</b><br><span style="color:var(--muted);font-size:12px;">HardhatTracker</span></div><span>→</span>
+        <div class="kcard">🧮 <b>佩戴判定</b><br><span style="color:var(--muted);font-size:12px;">hardhat_is_on()</span></div><span>→</span>
+        <div class="kcard">🟢 合规 / 🔴 违章标注</div>
+      </div>
+      <div class="formula">判定规则：安全帽中心点落在人体框顶部中央 1/3 的"安全区"内 → 判定已佩戴</div>
+
+      <h3>1.2 AI 在石化安全中的演进</h3>
+      <p>点击查看各阶段 👇</p>
+      <div class="timeline" id="timeline"></div>
+      <div class="tl-detail" id="tlDetail">👆 点击上方任一阶段…</div>
+
+      <div class="tip">💡 <b>本节课路线</b>：图像基础 → 目标检测两大基础概念（IoU 与置信度）→
+      项目核心算法拆解（安全区判定）→ 完整流水线与视频跟踪 → 工程实践与课后小测。</div>
+    </div>
+  </details>
+
+  <!-- ================= 2. 图像基础 ================= -->
+  <details class="section">
+    <summary><span class="num">2</span>图像基础：从现场画面到数字像素<span class="arrow">▼</span></summary>
+    <div class="body">
+      <p>摄像头采集的画面进入模型前，先被<b>采样</b>（空间离散化成 H×W 像素）和<b>量化</b>（幅值离散成 0–255 灰度级）。
+      分辨率和量化级数直接决定后续检测能看到多少细节。</p>
+      <div class="formula">存储大小 = H × W × C × (bit深度 / 8)</div>
+
+      <div class="demo">
+        <div class="demo-title">🎛️ 演示 2-1：罐区图像的采样与量化</div>
+        <div class="ctrl">
+          <label>分辨率 N × N</label>
+          <input type="range" id="smpRes" min="8" max="128" step="4" value="128" oninput="renderSampling()">
+          <span class="val" id="smpResV">128</span>
+        </div>
+        <div class="ctrl">
+          <label>量化级数（灰度级）</label>
+          <input type="range" id="smpQ" min="2" max="256" value="256" oninput="renderSampling()">
+          <span class="val" id="smpQV">256</span>
+        </div>
+        <div class="canvases">
+          <div class="cv-box"><canvas id="smpOrig" width="256" height="256"></canvas><div class="cap">原始 128×128 罐区灰度图</div></div>
+          <div class="cv-box"><canvas id="smpOut" width="256" height="256"></canvas><div class="cap">采样 + 量化后</div></div>
+        </div>
+        <div class="stat">存储大小：<b id="smpBytes">16384 B</b>（灰度，每像素 1 字节）</div>
+        <div class="warn">⚠️ 把分辨率拖到 16 以下：远处作业人员的小目标基本消失——这解释了为什么远距离监控需要更高分辨率，或者部署时把大画面切成多个小画面分别检测（这也是实际石化项目的常见做法）。</div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ================= 3. 目标检测基础 ================= -->
+  <details class="section">
+    <summary><span class="num">3</span>目标检测基础：IoU 与置信度阈值<span class="arrow">▼</span></summary>
+    <div class="body">
+      <h3>3.1 IoU：预测框和真值框重合吗？</h3>
+      <p>YOLO 输出成百上千个候选框，只有和人工标注的"真值框"足够重叠（IoU ≥ 0.5）的才算有效检出。</p>
+      <div class="formula">IoU = 交集面积 / 并集面积</div>
+      <div class="demo">
+        <div class="demo-title">🎛️ 演示 3-1：拖动蓝色"安全帽预测框"，实时计算 IoU</div>
+        <svg id="iouSvg" width="380" height="300" style="background:#fff;border:1px solid var(--border);border-radius:8px;touch-action:none;"></svg>
+        <div style="margin-top:8px;">
+          <div class="stat">交集面积：<b id="iouInter">–</b> px²</div>
+          <div class="stat">并集面积：<b id="iouUnion">–</b> px²</div>
+          <div class="stat">IoU：<b id="iouVal">–</b>　<span id="iouPass"></span></div>
+          <button class="ghost" onclick="resetIou()">↩️ 重置预测框</button>
+        </div>
+        <div class="tip">💡 红框 = 人工标注的真值安全帽位置，蓝框 = 模型预测。训练时用 IoU 计算 loss，推理时用 IoU 做后处理（NMS 去除重复框也依赖它）。</div>
+      </div>
+
+      <h3>3.2 置信度阈值：Precision 与 Recall 的权衡</h3>
+      <p>模型给每个检测框一个<b>置信度</b>分数（0~1）。阈值调高 → 只留"很有把握"的框：误报少（Precision 高）但容易漏检（Recall 低）；阈值调低则相反。
+      在石化安全场景中，<b>漏掉一个没戴安全帽的人可能就是一起事故</b>——所以安全应用宁可误报，也要尽量不漏检。</p>
+      <div class="formula">Precision = TP / (TP + FP)　　Recall = TP / (TP + FN)　　F1 = 2PR/(P+R)</div>
+      <div class="demo">
+        <div class="demo-title">🎛️ 演示 3-2：调节置信度阈值，观察 P / R / F1 变化</div>
+        <div class="ctrl">
+          <label>置信度阈值</label>
+          <input type="range" id="confT" min="0.05" max="0.95" step="0.01" value="0.50" oninput="renderConf()">
+          <span class="val" id="confTV">0.50</span>
+        </div>
+        <div class="canvases">
+          <div class="cv-box"><canvas id="confCv" width="400" height="190"></canvas><div class="cap">绿=TP（正确检出） 橙=FP（误报） 红虚线=FN（漏检）</div></div>
+        </div>
+        <div class="stat">TP：<b id="mTP">–</b>　FP：<b id="mFP">–</b>　FN：<b id="mFN">–</b></div>
+        <div class="stat">Precision：<b id="mP">–</b>　Recall：<b id="mR">–</b>　F1：<b id="mF1">–</b></div>
+        <div class="danger">🔴 安全视角思考题：阈值拉到 0.9 时 Recall 降到多少？漏检的那顶安全帽对应哪个工人？如果你是车间安全主任，你会选高阈值还是低阈值？</div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ================= 4. 项目核心算法 ================= -->
+  <details class="section">
+    <summary><span class="num">4</span>项目核心：安全帽佩戴判定算法 hardhat_is_on<span class="arrow">▼</span></summary>
+    <div class="body">
+      <p>检测出"人"和"帽子"只是第一步——<b>怎么知道这顶帽子戴在这个人头上，而不是他拿在手里、掉在地上？</b>
+      本项目的答案是：在人体框的<b>顶部中央</b>划出一个"安全区"，只要安全帽框的<b>中心点</b>落在这个区域内，就判定已佩戴。</p>
+
+      <pre class="code"><span class="cm"># utils/bbox_utils.py —— 项目源码（节选）</span>
+<span class="kw">def</span> <span class="fn">hardhat_is_on</span>(bbox, bbox_hh, frame):
+    person_height = bbox[3] - bbox[1]        <span class="cm"># 人体框高度</span>
+    person_width  = bbox[2] - bbox[0]        <span class="cm"># 人体框宽度</span>
+    hardhat_height = bbox_hh[3] - bbox_hh[1]
+
+    x1 = bbox[0] + person_width/2 - person_width/6   <span class="cm"># 中央 1/3 的左边界</span>
+    x2 = bbox[0] + person_width/2 + person_width/6   <span class="cm"># 右边界</span>
+    y1 = bbox[1] - hardhat_height/2                  <span class="cm"># 顶部再往上留半个帽高</span>
+    y2 = bbox[3] - person_height*3/4                 <span class="cm"># 底部：人体框上 1/4 处</span>
+    safe_area = (x1, y1, x2, y2)
+
+    center = ((bbox_hh[0]+bbox_hh[2])/2, (bbox_hh[1]+bbox_hh[3])/2)
+    <span class="kw">return</span> point_in_area(center, safe_area)</pre>
+
+      <div class="demo">
+        <div class="demo-title">🎛️ 演示 4-1：拖动安全帽框，体验"安全区"判定</div>
+        <svg id="safeSvg" width="460" height="380" style="background:#fff;border:1px solid var(--border);border-radius:8px;touch-action:none;"></svg>
+        <div style="margin-top:8px;">
+          <div class="stat">安全区 x：<b id="saX">–</b>　y：<b id="saY">–</b></div>
+          <div class="stat">帽子中心：<b id="hhC">–</b></div>
+          <div class="stat">判定结果：<b id="saVerdict">–</b></div>
+          <button class="ghost" onclick="resetSafe()">↩️ 重置帽子位置</button>
+        </div>
+        <div class="tip">💡 黄色半透明区域就是"安全区"（人体框顶部中央 1/3）。把帽子拖到胸口、手上、脚边试试——只要中心出圈，立刻判违章变红。</div>
+      </div>
+
+      <div class="warn">⚠️ <b>代码审查小练习</b>：仔细看源码第 24 行——
+      <code class="inline">if y2 &lt; 0: y1 = 0</code>。想让它把越界的安全区底部修正为 0，应该改哪个变量？
+      （答案：应为 <code class="inline">y2 = 0</code>，这是一个真实的笔误型 bug。当人体框贴近画面顶端时，安全区会被错误放大——读开源代码时养成"逐行核边界条件"的习惯，是 AI+X 工程实践的重要一课。）</div>
+    </div>
+  </details>
+
+  <!-- ================= 5. 完整流水线 ================= -->
+  <details class="section">
+    <summary><span class="num">5</span>完整流水线：从检测到违章告警（含视频跟踪）<span class="arrow">▼</span></summary>
+    <div class="body">
+      <p>下面用一个模拟的炼化装置现场，分步复现 <code class="inline">main.py</code> 的处理流程。
+      4 名工人中，<b>2 号工人没戴安全帽</b>（其余三人均戴黄色安全帽），最终应被判为违章。</p>
+
+      <div class="demo">
+        <div class="demo-title">🎬 演示 5-1：分步执行检测流水线</div>
+        <div class="ctrl" id="pipeBtns">
+          <button class="step" data-s="0" onclick="setStep(0)">① 原始画面</button>
+          <button class="step" data-s="1" onclick="setStep(1)">② 人员检测</button>
+          <button class="step" data-s="2" onclick="setStep(2)">③ 安全帽检测</button>
+          <button class="step" data-s="3" onclick="setStep(3)">④ 佩戴判定与告警</button>
+          <button onclick="runAll()">▶ 自动播放</button>
+        </div>
+        <div class="canvases">
+          <div class="cv-box"><canvas id="pipeCv" width="480" height="300"></canvas><div class="cap" id="pipeCap">模拟炼化装置现场</div></div>
+          <div style="max-width:280px;font-size:14px;">
+            <div class="stat" id="pipeStat">当前步骤说明</div>
+            <p style="font-size:13.5px;color:var(--muted);">对应源码：① read_picture → ② PersonTracker.detect_frame → ③ HardhatTracker.detect_frame → ④ draw_frame_bboxes（hardhat_is_on 匹配）</p>
+          </div>
+        </div>
+        <div class="tip">💡 现实中两套模型是并行推理的（人员用 YOLOv8x 大模型、安全帽用专门训练的 200 epochs 模型），最后在绘制阶段才"对上号"。</div>
+      </div>
+
+      <h3>5.2 视频里的难题：检测闪断与轨迹插值</h3>
+      <p>视频逐帧检测时，工人被管廊短暂遮挡，或帽子角度突变，某几帧可能"检测不到"安全帽（数值缺失）。
+      本项目用 Pandas 的 <code class="inline">interpolate()</code> 沿时间轴<b>线性插值</b>补齐缺失位置，再用 <code class="inline">bfill()</code> 处理开头缺失。</p>
+      <div class="demo">
+        <div class="demo-title">🎛️ 演示 5-2：第 4 帧安全帽检测丢失 → 插值补齐</div>
+        <div class="ctrl">
+          <button id="interpBtn" class="ghost" onclick="toggleInterp()">🔧 启用插值</button>
+        </div>
+        <div class="canvases" id="interpWrap"></div>
+        <div class="tip">💡 插值假设"位置随时间平滑变化"——对匀速行走的工人很有效；但如果工人突然蹲下/转身，线性插值会给出不符合真实动作的位置。跟踪（Track ID）+ 插值是视频结构化分析的通用套路。</div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ================= 6. 工程实践 ================= -->
+  <details class="section">
+    <summary><span class="num">6</span>工程实践：训练自己的模型与石化场景扩展<span class="arrow">▼</span></summary>
+    <div class="body">
+      <h3>6.1 项目文件导读</h3>
+      <table>
+        <tr><th>文件 / 目录</th><th>职责</th><th>流水线角色</th></tr>
+        <tr><td><code class="inline">main.py</code></td><td>总入口：依次处理 2 张图片 + 1 段视频</td><td>串联全流程</td></tr>
+        <tr><td><code class="inline">trackers/person_tracker.py</code></td><td>YOLOv8x 检测人员（带 track ID）并绘制红/绿框</td><td>② + ④</td></tr>
+        <tr><td><code class="inline">trackers/hardhat_tracker.py</code></td><td>专用模型检测安全帽 + 帧间位置插值</td><td>③ + 视频补漏</td></tr>
+        <tr><td><code class="inline">utils/bbox_utils.py</code></td><td>安全区判定 hardhat_is_on、框几何工具</td><td>④ 核心算法</td></tr>
+        <tr><td><code class="inline">training/datasets/</code></td><td>Roboflow 数据集下载与训练 Notebook</td><td>模型再训练</td></tr>
+        <tr><td><code class="inline">models/</code></td><td>训练好的权重（YOLO11 · 200 epochs）</td><td>推理引擎</td></tr>
+      </table>
+
+      <h3>6.2 用自己的数据再训练（4 步）</h3>
+      <pre class="code"><span class="cm"># ① 从 Roboflow Universe 下载标注好的数据集（YOLO 格式）</span>
+rf = Roboflow(api_key=<span class="fn">"YOUR_KEY"</span>)
+dataset = rf.workspace(...).project(<span class="fn">"helmet-tracking"</span>).version(2).download(<span class="fn">"yolov8"</span>)
+
+<span class="cm"># ② 加载预训练权重开始微调</span>
+<span class="kw">from</span> ultralytics <span class="kw">import</span> YOLO
+model = YOLO(<span class="fn">'yolov8x.pt'</span>)
+model.train(data=<span class="fn">"data.yaml"</span>, epochs=100, imgsz=640)
+
+<span class="cm"># ③ 结果在 runs/detect/train/weights/best.pt</span>
+<span class="cm"># ④ 换上你的石化现场数据（夜间/逆光/烟雾）重复 ①~③</span></pre>
+      <div class="tip">💡 YOLO 标注格式：每行 <code class="inline">class x_center y_center width height</code>（均归一化到 0~1）。
+      石化落地建议：采集现场真实机位（高角度、远距离）的图像重新标注，泛化性远好于直接用公开数据集。</div>
+
+      <h3>6.3 现实局限与石化场景扩展方向</h3>
+      <table>
+        <tr><th>本项目局限</th><th>石化场景的应对 / 扩展</th></tr>
+        <tr><td>只判断"帽子在不在头顶"，不判断是否系好下颚带</td><td>增加细粒度分类模型或关键点检测</td></tr>
+        <tr><td>RGB 相机夜间失效</td><td>换红外/热成像相机 + 对应数据集再训练</td></tr>
+        <tr><td>遮挡、密集人群易漏检</td><td>多机位协同 + 跟踪轨迹融合</td></tr>
+        <tr><td>单一 PPE（只有安全帽）</td><td>扩展类别：防静电服、护目镜、安全带、禁烟区吸烟行为</td></tr>
+        <tr><td>检测到违章只画框，不联动</td><td>对接广播/工单系统：自动定位 Track ID → 通知区域责任人</td></tr>
+        <tr><td>未涉及工艺介质风险</td><td>结合 DCS/气体检测数据做多模态融合（视觉 + 传感器）</td></tr>
+      </table>
+      <div class="warn">⚠️ <b>合规提醒</b>：现场视频涉及人员肖像与行为数据，部署时须遵循企业数据安全与个人信息保护制度，
+      通常做法是边缘端推理、只输出"违章事件"而非存储原始视频。</div>
+    </div>
+  </details>
+
+  <!-- ================= 7. 小测 ================= -->
+  <details class="section">
+    <summary><span class="num">7</span>课后小测：检验学习效果<span class="arrow">▼</span></summary>
+    <div class="body">
+      <div id="quizBox"></div>
+      <div style="margin-top:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <button onclick="gradeQuiz()">✅ 提交答案</button>
+        <button class="ghost" onclick="initQuiz()">🔄 重置</button>
+        <span class="stat" id="quizScore"></span>
+      </div>
+    </div>
+  </details>
+
+  <footer>
+    AI+X 石油化工互动课堂 · 基于 hard-hat-detection 项目（Apache 2.0）设计<br>
+    单文件网页 · 所有画面均为程序实时合成 · 可直接双击浏览器打开或挂到课堂内网静态服务器
+  </footer>
+</div>
+
+<script>
+"use strict";
+/* ============ 公共工具 ============ */
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function drawGray(cv,data,w,h,scale){
+  const ctx=cv.getContext("2d");
+  const off=document.createElement("canvas");off.width=w;off.height=h;
+  const octx=off.getContext("2d");
+  const im=octx.createImageData(w,h);
+  for(let i=0;i<w*h;i++){const v=data[i];im.data[i*4]=v;im.data[i*4+1]=v;im.data[i*4+2]=v;im.data[i*4+3]=255;}
+  octx.putImageData(im,0,0);
+  cv.width=w*scale;cv.height=h*scale;
+  ctx.imageSmoothingEnabled=false;
+  ctx.drawImage(off,0,0,w*scale,h*scale);
+}
+
+/* ============ 合成罐区灰度图 128×128 ============ */
+const W=128,H=128;
+function synthYard(){
+  const img=new Float32Array(W*H);
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+    let v=y<38?150-y*1.1:112;
+    v+=9*Math.sin(x/9)+7*Math.sin(y/7)+8*Math.random();
+    img[y*W+x]=v;
+  }
+  const tanks=[[28,62,16],[68,66,20],[104,58,13],[44,98,17],[94,100,14]];
+  for(const[cx,cy,r]of tanks){
+    for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){
+      const d2=dx*dx+dy*dy;
+      if(d2<=r*r){const x=cx+dx,y=cy+dy;
+        if(x>=0&&x<W&&y>=0&&y<H){
+          let v=138-0.9*dx+10*Math.random();
+          if(Math.abs(Math.sqrt(d2)-r)<1.6)v-=30; // 罐壁轮廓
+          img[y*W+x]=v;
+        }}}
+  }
+  for(let x=0;x<W;x++){const y=80+Math.round(3*Math.sin(x/18));
+    if(y>=0&&y<H){img[y*W+x]=62;img[(y+1)*W+x]=62;}}
+  const u8=new Uint8ClampedArray(W*H);
+  for(let i=0;i<W*H;i++)u8[i]=clamp(img[i],0,255);
+  return u8;
+}
+const yardImg=synthYard();
+
+/* ============ 演示 2-1 采样量化 ============ */
+function renderSampling(){
+  const N=+document.getElementById("smpRes").value;
+  const Q=+document.getElementById("smpQ").value;
+  document.getElementById("smpResV").textContent=N;
+  document.getElementById("smpQV").textContent=Q;
+  drawGray(document.getElementById("smpOrig"),yardImg,W,H,2);
+  const step=W/N;
+  const out=new Uint8ClampedArray(N*N);
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){
+    const v=yardImg[Math.floor(y*step)*W+Math.floor(x*step)];
+    out[y*N+x]=Math.round(Math.floor(v/256*Q)/(Q-1)*255);
+  }
+  drawGray(document.getElementById("smpOut"),out,N,N,Math.floor(256/N)||1);
+  document.getElementById("smpBytes").textContent=(N*N)+" B";
+}
+renderSampling();
+
+/* ============ 演示 3-1 IoU ============ */
+const iouSvg=document.getElementById("iouSvg");
+const GT={x:140,y:110,w:80,h:52};
+const PD0={x:190,y:150,w:70,h:46};
+let PD={...PD0},drag=null;
+function svgBox(b,fill,stroke,label,dash){
+  return `<rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}"
+    fill="${fill}" fill-opacity="0.18" stroke="${stroke}" stroke-width="2.5"
+    ${dash?`stroke-dasharray="${dash}"`:""} rx="3"/>
+    <text x="${b.x+4}" y="${b.y+16}" font-size="13" fill="${stroke}" font-weight="bold">${label}</text>`;
+}
+function renderIou(){
+  const ix=Math.max(GT.x,PD.x),iy=Math.max(GT.y,PD.y);
+  const ix2=Math.min(GT.x+GT.w,PD.x+PD.w),iy2=Math.min(GT.y+GT.h,PD.y+PD.h);
+  const iw=Math.max(0,ix2-ix),ih=Math.max(0,iy2-iy);
+  const inter=iw*ih,union=GT.w*GT.h+PD.w*PD.h-inter;
+  const iou=inter/union;
+  let interRect="";
+  if(iw>0&&ih>0)interRect=`<rect x="${ix}" y="${iy}" width="${iw}" height="${ih}"
+     fill="#7c3aed" fill-opacity="0.45" stroke="#7c3aed" stroke-width="1"/>`;
+  iouSvg.innerHTML=
+    `<rect width="380" height="300" fill="#fafcff"/>`+
+    svgBox(GT,"#dc2626","#dc2626","真值 安全帽")+interRect+
+    svgBox(PD,"#2563eb","#2563eb","预测 (拖我)","6,4");
+  document.getElementById("iouInter").textContent=inter;
+  document.getElementById("iouUnion").textContent=union;
+  document.getElementById("iouVal").textContent=iou.toFixed(3);
+  const pass=document.getElementById("iouPass");
+  pass.innerHTML=iou>=0.5
+    ?'<span class="badge" style="background:#16a34a;">✓ IoU≥0.5 有效检出</span>'
+    :'<span class="badge" style="background:#64748b;">✗ 未达 0.5 视为漏检</span>';
+}
+function resetIou(){PD={...PD0};renderIou();}
+resetIou();
+iouSvg.addEventListener("pointerdown",e=>{
+  const r=iouSvg.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
+  if(mx>=PD.x&&mx<=PD.x+PD.w&&my>=PD.y&&my<=PD.y+PD.h){
+    drag={dx:mx-PD.x,dy:my-PD.y};iouSvg.setPointerCapture(e.pointerId);}
+});
+iouSvg.addEventListener("pointermove",e=>{
+  if(!drag)return;
+  const r=iouSvg.getBoundingClientRect();
+  PD.x=clamp(e.clientX-r.left-drag.dx,0,380-PD.w);
+  PD.y=clamp(e.clientY-r.top-drag.dy,0,300-PD.h);
+  renderIou();
+});
+iouSvg.addEventListener("pointerup",()=>drag=null);
+
+/* ============ 演示 3-2 置信度阈值 → P/R/F1 ============ */
+const DETS=[
+ {x:18, y:26, conf:0.96, gt:true},
+ {x:108,y:20, conf:0.90, gt:true},
+ {x:200,y:30, conf:0.78, gt:true},
+ {x:292,y:24, conf:0.38, gt:true},   // 低置信度真目标：高阈值时漏检
+ {x:66, y:110,conf:0.62, gt:false},  // 误报：管廊阴影
+ {x:158,y:120,conf:0.52, gt:false},  // 误报：塔影
+ {x:250,y:112,conf:0.25, gt:false}]; // 误报：阀门反光
+const GT_TOTAL=DETS.filter(d=>d.gt).length;
+function renderConf(){
+  const t=+document.getElementById("confT").value;
+  document.getElementById("confTV").textContent=t.toFixed(2);
+  const cv=document.getElementById("confCv"),ctx=cv.getContext("2d");
+  ctx.fillStyle="#fafcff";ctx.fillRect(0,0,400,190);
+  ctx.fillStyle="#64748b";ctx.font="12px sans-serif";
+  ctx.fillText("模拟装置区画面（4 个真实安全帽 + 3 处误报源）",10,16);
+  let TP=0,FP=0,FN=0;
+  for(const d of DETS){
+    const on=d.conf>=t;
+    let color,fill,dash=null,label="";
+    if(on&&d.gt){color="#16a34a";fill="rgba(22,163,74,.2)";label="TP";TP++;}
+    else if(on&&!d.gt){color="#ea580c";fill="rgba(234,88,12,.2)";label="FP";FP++;}
+    else if(!on&&d.gt){color="#dc2626";fill="none";dash=[5,4];label="FN";FN++;}
+    else continue; // 低置信度且本来就不是目标 → 直接丢弃,不计入
+    ctx.strokeStyle=color;ctx.lineWidth=2;
+    ctx.setLineDash(dash||[]);
+    if(fill){ctx.fillStyle=fill;ctx.fillRect(d.x,d.y,48,32);}
+    ctx.strokeRect(d.x,d.y,48,32);ctx.setLineDash([]);
+    ctx.fillStyle=color;ctx.fillText(label,d.x+2,d.y-3);
+  }
+  const P=(TP+FP)?TP/(TP+FP):0,R=(TP+FN)?TP/(TP+FN):0;
+  const F1=(P+R)?2*P*R/(P+R):0;
+  document.getElementById("mTP").textContent=TP;
+  document.getElementById("mFP").textContent=FP;
+  document.getElementById("mFN").textContent=FN;
+  document.getElementById("mP").textContent=P.toFixed(2);
+  document.getElementById("mR").textContent=R.toFixed(2);
+  document.getElementById("mF1").textContent=F1.toFixed(2);
+}
+renderConf();
+
+/* ============ 演示 4-1 安全区判定 ============ */
+const safeSvg=document.getElementById("safeSvg");
+const PB={x:140,y:70,w:130,h:260};   // 人体框（固定）
+const HH0={x:172,y:76,w:66,h:32};    // 安全帽框（可拖动）；初始位于头顶→绿色"已佩戴"，拖出安全区即变红
+let HH={...HH0},safeDrag=null;
+function safeArea(pb,hh){
+  const pw=pb.w,ph=pb.h,hhH=hh.h;
+  const x1=pb.x+pw/2-pw/6, x2=pb.x+pw/2+pw/6;
+  const y1=pb.y-hhH/2, y2=pb.y+ph*1/4;
+  return {x1,x2,y1,y2};
+}
+function renderSafe(){
+  const sa=safeArea(PB,HH);
+  const cx=(HH.x+HH.x+HH.w)/2, cy=(HH.y+HH.y+HH.h)/2;
+  const on=sa.x1<=cx&&cx<=sa.x2&&sa.y1<=cy&&cy<=sa.y2;
+  const pc=on?"#16a34a":"#dc2626";
+  const headCx=PB.x+PB.w/2, headCy=PB.y+22;
+  safeSvg.innerHTML=
+    `<rect width="460" height="380" fill="#fafcff"/>
+     <rect x="${PB.x}" y="${PB.y}" width="${PB.w}" height="${PB.h}"
+       fill="none" stroke="${pc}" stroke-width="3" rx="4"/>
+     <text x="${PB.x}" y="${PB.y-8}" font-size="13" fill="${pc}" font-weight="bold">
+       人员框 ${on?"🟢 已佩戴":"🔴 未佩戴"}</text>
+     <rect x="${sa.x1}" y="${sa.y1}" width="${sa.x2-sa.x1}" height="${sa.y2-sa.y1}"
+       fill="#facc15" fill-opacity="0.30" stroke="#d97706" stroke-width="1.5" stroke-dasharray="5,4"/>
+     <text x="${sa.x1}" y="${sa.y1-4}" font-size="12" fill="#b45309" font-weight="bold">安全区（顶部中央 1/3）</text>
+     <circle cx="${headCx}" cy="${headCy}" r="20" fill="#fcd34d" stroke="#92400e" stroke-width="2"/>
+     <rect x="${PB.x+20}" y="${PB.y+48}" width="${PB.w-40}" height="${PB.h-48}" rx="8"
+       fill="#ea580c" fill-opacity="0.85"/>
+     <text x="${headCx}" y="${PB.y+8}" text-anchor="middle" font-size="16">💪</text>
+     <rect x="${HH.x}" y="${HH.y}" width="${HH.w}" height="${HH.h}" rx="6"
+       fill="#facc15" fill-opacity="0.9" stroke="#a16207" stroke-width="2.5" style="cursor:move;"/>
+     <text x="${HH.x+6}" y="${HH.y-5}" font-size="12" fill="#a16207" font-weight="bold">⛑️ 安全帽框 (拖我)</text>
+     <circle cx="${cx}" cy="${cy}" r="4" fill="${on?"#16a34a":"#dc2626"}"/>`;
+  document.getElementById("saX").textContent=`[${sa.x1.toFixed(0)}, ${sa.x2.toFixed(0)}]`;
+  document.getElementById("saY").textContent=`[${sa.y1.toFixed(0)}, ${sa.y2.toFixed(0)}]`;
+  document.getElementById("hhC").textContent=`(${cx.toFixed(0)}, ${cy.toFixed(0)})`;
+  document.getElementById("saVerdict").innerHTML=on
+    ?'<span style="color:#16a34a;">帽子中心在安全区内 → 已佩戴 🟢</span>'
+    :'<span style="color:#dc2626;">帽子中心在安全区外 → 违章告警 🔴</span>';
+}
+function resetSafe(){HH={...HH0};renderSafe();}
+resetSafe();
+safeSvg.addEventListener("pointerdown",e=>{
+  const r=safeSvg.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
+  if(mx>=HH.x&&mx<=HH.x+HH.w&&my>=HH.y&&my<=HH.y+HH.h){
+    safeDrag={dx:mx-HH.x,dy:my-HH.y};safeSvg.setPointerCapture(e.pointerId);}
+});
+safeSvg.addEventListener("pointermove",e=>{
+  if(!safeDrag)return;
+  const r=safeSvg.getBoundingClientRect();
+  HH.x=clamp(e.clientX-r.left-safeDrag.dx,10,460-HH.w-10);
+  HH.y=clamp(e.clientY-r.top-safeDrag.dy,10,380-HH.h-10);
+  renderSafe();
+});
+safeSvg.addEventListener("pointerup",()=>safeDrag=null);
+
+/* ============ 演示 5-1 流水线分步 ============ */
+const pipeCv=document.getElementById("pipeCv"),pctx=pipeCv.getContext("2d");
+const WORKERS=[
+ {x:40, y:150,suit:"#ea580c",helmet:"#facc15",on:true },
+ {x:150,y:145,suit:"#2563eb",helmet:null,     on:false},
+ {x:260,y:152,suit:"#0e7490",helmet:"#facc15",on:true },
+ {x:370,y:148,suit:"#ea580c",helmet:"#facc15",on:true }];
+function personBox(wk){return {x:wk.x-8,y:wk.y-36,w:50,h:114,id:WORKERS.indexOf(wk)+1};}
+function helmetBox(wk){return {x:wk.x+3,y:wk.y-34,w:28,h:14};}
+function drawScene(ctx){
+  // 背景：天空 + 装置
+  const sky=ctx.createLinearGradient(0,0,0,300);
+  sky.addColorStop(0,"#dbeafe");sky.addColorStop(1,"#eff6ff");
+  ctx.fillStyle=sky;ctx.fillRect(0,0,480,300);
+  ctx.fillStyle="#94a3b8";
+  ctx.fillRect(30,60,40,180);            // 塔1
+  ctx.fillRect(300,80,36,160);           // 塔2
+  ctx.beginPath();ctx.arc(360,140,32,Math.PI,0);ctx.fill(); // 球罐
+  ctx.fillRect(200,100,50,140);          // 塔3
+  ctx.fillStyle="#64748b";
+  for(let i=0;i<3;i++)ctx.fillRect(120+i*60,200,50,40);   // 管廊墩
+  ctx.fillStyle="#a8a29e";ctx.fillRect(0,240,480,60);      // 地面
+  ctx.strokeStyle="#78716c";ctx.beginPath();ctx.moveTo(0,240);ctx.lineTo(480,240);ctx.stroke();
+  // 工人
+  for(const wk of WORKERS){
+    ctx.fillStyle=wk.suit;
+    ctx.fillRect(wk.x,wk.y,34,74);                      // 工服
+    ctx.fillRect(wk.x+4,wk.y+74,9,26);ctx.fillRect(wk.x+21,wk.y+74,9,26); // 腿
+    ctx.fillStyle="#fcd34d";
+    ctx.beginPath();ctx.arc(wk.x+17,wk.y-14,13,0,Math.PI*2);ctx.fill();   // 头
+    if(wk.on){ctx.fillStyle=wk.helmet;
+      ctx.beginPath();ctx.arc(wk.x+17,wk.y-16,14,Math.PI,0);ctx.fill();
+      ctx.fillRect(wk.x+1,wk.y-18,32,5);}
+  }
+}
+function drawBox(ctx,b,color,label,dash){
+  ctx.strokeStyle=color;ctx.lineWidth=2.5;ctx.setLineDash(dash||[]);
+  ctx.strokeRect(b.x,b.y,b.w,b.h);ctx.setLineDash([]);
+  ctx.fillStyle=color;ctx.font="bold 12px sans-serif";
+  ctx.fillText(label,b.x,b.y-5);
+}
+function setStep(s){
+  document.querySelectorAll("#pipeBtns .step").forEach(b=>b.classList.toggle("on",+b.dataset.s===s));
+  drawScene(pctx);
+  const cap=document.getElementById("pipeCap"),stat=document.getElementById("pipeStat");
+  if(s>=1){
+    for(const wk of WORKERS)drawBox(pctx,personBox(wk),"#2563eb","Person ID:"+(WORKERS.indexOf(wk)+1),[6,3]);
+    cap.textContent="② PersonTracker 输出的人员检测框";
+    stat.innerHTML=s===1?"检测到 <b>4</b> 名作业人员（含 Track ID）":"人员框已缓存，继续安全帽检测";
+  }
+  if(s>=2){
+    const hats=WORKERS.filter(w=>w.on);
+    for(const wk of hats)drawBox(pctx,helmetBox(wk),"#16a34a","Hardhat");
+    cap.textContent="③ HardhatTracker 输出的安全帽检测框";
+    stat.innerHTML=s===2?"检测到 <b>"+hats.length+"</b> 顶安全帽（1/3/4 号检出，<b style='color:#dc2626;'>2 号无检出</b>）":"安全帽框已缓存，进行佩戴匹配";
+  }
+  if(s>=3){
+    for(const wk of WORKERS){
+      const c=wk.on?"#16a34a":"#dc2626";
+      drawBox(pctx,personBox(wk),c,(wk.on?"合规":"⚠ 违章"));
+    }
+    cap.textContent="④ hardhat_is_on 匹配后的最终标注";
+    stat.innerHTML='判定完成：<b style="color:#16a34a;">3 人合规</b> / <b style="color:#dc2626;">1 人违章（2 号未戴帽）</b> → 触发告警，通知区域安全员';
+  }
+  if(s===0){
+    cap.textContent="① 原始画面（模拟炼化装置区）";
+    stat.innerHTML="摄像头画面进入流水线——模型还没开始工作";
+  }
+}
+let pipeTimer=null;
+function runAll(){
+  clearInterval(pipeTimer);let s=0;setStep(0);
+  pipeTimer=setInterval(()=>{
+    s++;if(s>3){clearInterval(pipeTimer);return;}
+    setStep(s);
+  },1100);
+}
+setStep(0);
+
+/* ============ 演示 5-2 轨迹插值 ============ */
+const FRAMES=[30,45,60,null,90,105];
+let interpOn=false;
+function buildInterp(){
+  const wrap=document.getElementById("interpWrap");
+  wrap.innerHTML=FRAMES.map((_,i)=>
+    `<div class="cv-box"><canvas id="fr${i}" width="110" height="140"></canvas><div class="cap">第 ${i+1} 帧</div></div>`).join("");
+  FRAMES.forEach((hx,i)=>{
+    const cv=document.getElementById("fr"+i),ctx=cv.getContext("2d");
+    ctx.fillStyle="#eff6ff";ctx.fillRect(0,0,110,140);
+    ctx.fillStyle="#a8a29e";ctx.fillRect(0,110,110,30);
+    // 小人
+    ctx.fillStyle="#0e7490";ctx.fillRect(44,60,22,44);
+    ctx.fillStyle="#fcd34d";ctx.beginPath();ctx.arc(55,50,10,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle="#2563eb";ctx.strokeRect(36,36,38,72);
+    ctx.fillStyle="#2563eb";ctx.font="11px sans-serif";ctx.fillText("Person 1",38,32);
+    let x=hx;
+    if(x===null&&interpOn)x=(FRAMES[2]+FRAMES[4])/2; // 60 与 90 → 75
+    if(x!==null){
+      const missing=(hx===null);
+      ctx.fillStyle="#facc15";
+      ctx.beginPath();ctx.arc(x+55-30,40,9,Math.PI,0);ctx.fill();
+      ctx.strokeStyle=missing?"#d97706":"#16a34a";ctx.lineWidth=2;
+      ctx.setLineDash(missing?[4,3]:[]);
+      ctx.strokeRect(x+16,30,18,11);ctx.setLineDash([]);
+      ctx.fillStyle=missing?"#b45309":"#16a34a";ctx.font="10px sans-serif";
+      ctx.fillText(missing?"插值 ≈75":"检测到",x+8,24);
+    }else{
+      ctx.fillStyle="#dc2626";ctx.font="bold 12px sans-serif";
+      ctx.fillText("❓ 检测丢失",18,42);
+      ctx.strokeStyle="#dc2626";ctx.setLineDash([3,3]);
+      ctx.strokeRect(16,30,78,18);ctx.setLineDash([]);
+    }
+  });
+  document.getElementById("interpBtn").textContent=interpOn?"⏮ 关闭插值":"🔧 启用插值";
+}
+function toggleInterp(){interpOn=!interpOn;buildInterp();}
+buildInterp();
+
+/* ============ 时间线 ============ */
+const MILESTONES=[
+  ["2010 前","人工巡检时代","安全员现场巡查 + 视频监控人工盯屏，覆盖率低、易疲劳漏检。"],
+  ["2012–2015","机器视觉初试","传统图像处理（颜色阈值、HOG 特征）尝试 PPE 检测，受光照/遮挡影响大。"],
+  ["2016–2019","深度学习进场","Faster R-CNN、YOLO 系列让安全帽检测准确率跃升，石化园区开始试点。"],
+  ["2020–2023","规模化落地","YOLOv5/v8 + 边缘计算盒子普及，'AI 安全舱'进入炼化企业标准方案。"],
+  ["2024 至今","多模态与智能体","VLM 理解复杂现场语义、Agent 自动派发整改工单，走向'感知-判断-处置'闭环。"]];
+(function(){
+  const tl=document.getElementById("timeline");
+  tl.innerHTML=MILESTONES.map((m,i)=>`<div class="tl-item" data-i="${i}"><b>${m[0]}</b>${m[1]}</div>`).join("");
+  tl.addEventListener("click",e=>{
+    const it=e.target.closest(".tl-item");if(!it)return;
+    tl.querySelectorAll(".tl-item").forEach(x=>x.style.borderColor="");
+    it.style.borderColor="var(--accent)";
+    const m=MILESTONES[+it.dataset.i];
+    document.getElementById("tlDetail").innerHTML=`<b>${m[0]} · ${m[1]}</b> — ${m[2]}`;
+  });
+})();
+
+/* ============ 课后小测 ============ */
+const QUIZ=[
+  {q:"本项目判断'安全帽是否戴在头上'的依据是？",
+   o:["帽子框与人体框完全重合","安全帽框中心落在人体框顶部中央 1/3 的安全区内","帽子颜色与工服颜色匹配","人工二次确认"],a:1,
+   e:"hardhat_is_on() 在人体框顶部中央划出 1/3 宽度安全区，帽子框中心点落入即判定已佩戴。"},
+  {q:"两个完全不重叠的框，IoU 等于？",
+   o:["0","0.5","1","取决于框大小"],a:0,
+   e:"交集为 0，并集为两框面积之和，IoU = 0。"},
+  {q:"石化安全场景中把置信度阈值调得过高，最大的风险是？",
+   o:["误报太多扰民","漏检未戴安全帽者，可能酿成事故","模型训练变慢","显存占用升高"],a:1,
+   e:"阈值高 → Precision 升、Recall 降。安全场景漏检代价远大于误报，应优先保 Recall。"},
+  {q:"模型输出 100 个检测框，其中 90 个是误报、10 个全部正确检出，Precision 是？",
+   o:["0.10","0.90","0.09","0.99"],a:0,
+   e:"Precision = TP/(TP+FP) = 10/100 = 0.10——只看'报出来的准不准'，与漏检无关。"},
+  {q:"hard-hat-detection 项目用 Pandas 的 interpolate() 做什么？",
+   o:["图像插值放大","补齐视频中被遮挡帧缺失的安全帽位置","加速模型推理","数据集标注"],a:1,
+   e:"检测闪断导致某些帧没有帽子坐标，interpolate() 沿时间轴线性补齐，bfill() 处理开头缺失。"},
+  {q:"NMS（非极大值抑制）的作用是？",
+   o:["提高检测精度","去除同一目标的重复检测框","压缩模型体积","增强图像对比度"],a:1,
+   e:"同一目标常被预测出多个重叠框，NMS 按 IoU + 置信度只保留最佳的一个。"},
+  {q:"除了安全帽，石油化工现场还应检测的典型 PPE / 违章行为包括？",
+   o:["防静电服、护目镜、安全带","口红颜色、发型","手机品牌","袜子颜色"],a:0,
+   e:"石化场景的 PPE 体系还包括防静电服（防爆区）、护目镜、高处作业安全带等，均可作为检测类别扩展。"},
+  {q:"用公开数据集训练的模型直接部署到某炼化夜间装置区效果差，最可能的原因与对策是？",
+   o:["模型太大，删掉几层即可","训练数据与现场光照/机位分布不一致，应采集现场图像再训练","把阈值调到最低就行","换更大的显示器"],a:1,
+   e:"这是典型的域偏移（domain shift）。应对：采集目标现场（含夜间/逆光）数据、重新标注并微调。"},
+  {q:"YOLOv8 属于哪一类检测算法？",
+   o:["两阶段（先候选再分类）","单阶段（一次前向传播直接输出框）","生成式模型","无监督聚类"],a:1,
+   e:"YOLO 是单阶段检测的代表：一次前向同时输出位置+类别+置信度，速度快，适合实时视频监控。"},
+  {q:"部署现场人员行为分析系统时，下列哪项做法符合数据合规要求？",
+   o:["原始视频全部上传公有云长期保存","边缘端推理、只输出匿名化违章事件","把视频公开发到社交平台做宣传","随意导出给无关第三方"],a:1,
+   e:"应在边缘完成推理、最小化采集与存储，输出脱敏事件数据，遵循企业数据安全与个保制度。"}];
+function initQuiz(){
+  document.getElementById("quizBox").innerHTML=QUIZ.map((it,qi)=>
+    `<div class="quiz-q" id="qq${qi}">
+      <b>${qi+1}. ${it.q}</b>
+      <div class="opts">${it.o.map((o,oi)=>
+        `<label><input type="radio" name="q${qi}" value="${oi}"> ${String.fromCharCode(65+oi)}. ${o}</label>`).join("")}</div>
+      <div class="expl">💡 ${it.e}</div>
+    </div>`).join("");
+  document.getElementById("quizScore").textContent="";
+}
+function gradeQuiz(){
+  let score=0,unanswered=0;
+  QUIZ.forEach((it,qi)=>{
+    const sel=document.querySelector(`input[name=q${qi}]:checked`);
+    const box=document.getElementById("qq"+qi);
+    box.classList.remove("correct","wrong","done");
+    if(!sel){unanswered++;box.classList.add("done");return;}
+    if(+sel.value===it.a){score++;box.classList.add("correct");}
+    else box.classList.add("wrong");
+    box.classList.add("done");
+  });
+  const el=document.getElementById("quizScore");
+  if(unanswered===QUIZ.length){el.textContent="请先作答至少一道题";}
+  else{el.innerHTML=`得分：<b>${score} / ${QUIZ.length}</b>${unanswered?`（${unanswered} 题未作答）`:""}`;}
+}
+initQuiz();
+</script>
+</body>
+</html>
